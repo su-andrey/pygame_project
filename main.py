@@ -1,5 +1,5 @@
 import os
-
+from war import start as s_t
 import pygame
 
 missed = pygame.sprite.Group()
@@ -31,9 +31,7 @@ class Missed_Mine(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.centerx, self.rect.y = pos[0] // cell_size * cell_size + cell_size / 2, pos[
             1] // cell_size * cell_size
-        # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
-        # располагаем горы внизу
 
 
 class Board:
@@ -67,23 +65,27 @@ class Board:
 
     def get_click(self, pos):
         x, y = pos[0] // self.cell_size, pos[1] // self.cell_size
-        if self.check(x, y):
-            self.cnt += 1
-            self.board[y][x] = 2
-        else:
-            self.cnt += 1
-            missed.add(Missed_Mine(pos))
+        if x < self.height and y < self.height:
+            if self.check(x, y):
+                s_t(5)
+                self.cnt += 1
+                self.board[y][x] = 2
+            else:
+                self.cnt += 1
+                missed.add(Missed_Mine(pos))
 
     def check(self, x, y):
-        return self.board[y][x]
+        try:
+            return self.board[y][x]
+        except IndexError:
+            return None
 
     def render(self, screen):
         missed.draw(screen)
         for i in range(self.height):
             for j in range(self.width):
-                if self.board[i][j] in (0, 1):
-                    pygame.draw.rect(screen, 'white', (
-                        j * self.cell_size, i * self.cell_size, self.cell_size, self.cell_size), 1)
+                pygame.draw.rect(screen, 'white', (
+                    j * self.cell_size, i * self.cell_size, self.cell_size, self.cell_size), 1)
                 if self.board[j][i] == 2:
                     pygame.draw.line(screen, 'red', (i * self.cell_size, j * self.cell_size + 3),
                                      (i * self.cell_size + self.cell_size - 3, j * self.cell_size + cell_size - 3),
@@ -119,3 +121,4 @@ if __name__ == '__main__':
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 brd.get_click(event.pos)
+

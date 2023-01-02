@@ -64,27 +64,40 @@ ship_1 = pygame.sprite.Group()
 class Bullet(pygame.sprite.Sprite):
     image = load_image('bullet.png')
 
-    def __init__(self, x):
+    def __init__(self, x, y, sign):
         super().__init__(bullet)
-        self.image = Bullet.image
+        if sign == '-':
+            self.image = Bullet.image
+        else:
+            self.image = pygame.transform.flip(Bullet.image, False, True)
         self.rect = self.image.get_rect()
         self.rect.x = x + 40
-        self.rect.y = 580
+        self.rect.y = y
+        self.sign = sign
 
     def update(self):
-        if pygame.sprite.spritecollide(ship, bullet, True):
+        if pygame.sprite.collide_mask(ship, self):
             ship.health = ship.health[:-1]
-            expl = Explosion((self.rect.x + 30, self.rect.y - 80), 'sm')
+            print(ship.health)
+            self.kill()
+            expl = Explosion(self.rect.center)
             pygame.display.flip()
-        self.rect.y -= 20
-        if self.rect.y <= 0:
+        if pygame.sprite.collide_mask(cannon, self) and self.sign == '+':
+            ship.health.append('♥')
+            expl = Explosion(self.rect.center)
+            self.kill()
+        if self.sign == '-':
+            self.rect.y -= 20
+        else:
+            self.rect.y += 20
+        if self.rect.y <= 0 or self.rect.y >= height:
             self.kill()
 
 
 
 
 class Explosion(pygame.sprite.Sprite):
-    def __init__(self, center, size):
+    def __init__(self, center):
         super().__init__(all_sprites)
         self.size = size
         self.image = load_image(f'regularExplosion00.png')
@@ -96,7 +109,7 @@ class Explosion(pygame.sprite.Sprite):
     def go(self):
         ct = pygame.time.Clock()
         for i in range(9):
-            ct.tick(10)
+            ct.tick(15)
             all_sprites.draw(screen)
             self.image = load_image(f'regularExplosion0{i}.png')
             pygame.display.flip()
@@ -118,19 +131,19 @@ class Ship(pygame.sprite.Sprite):
         self.rect.y = 100
         self.x = self.rect.x
 
+
     def update(self):
         self.x += 20
-        if ((self.x - (self.x) % 1000) // 1000) % 2:
-            self.rect.x = 1000 - self.x % 1000
+        if ((self.x - self.x % 480) // 480) % 2:
+            self.rect.x = 480 - self.x % 480
             self.image = self.image_2
         else:
             self.image = self.image_1
-            self.rect.x = self.x % 1000
+            self.rect.x = self.x % 480
 
 
 ship = Ship((55, 200))
 all_sprites.add(ship)
-running = True
 clock = pygame.time.Clock()
 
 
@@ -138,23 +151,24 @@ def draw_text():
     font = pygame.font.Font(pygame.font.match_font('arial'), 50)
     text_surface = font.render(''.join(ship.health), True, 'red ')
     text_rect = text_surface.get_rect()
-    text_rect.midtop = (80, 0)
+    text_rect.midtop = (15 * len(ship.health), 0)
     screen.blit(text_surface, text_rect)
 
-
-while ship.health:
-    all_sprites.draw(screen)
-    clock.tick(30)
-    ship_1.draw(screen)
-    ship_1.update()
-    draw_text()
-    bullet.update()
-    bullet.draw(screen)
-    pygame.display.flip()
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            exit()
-        if event.type == pygame.KEYDOWN:
+def start(health):
+    bullet = pygame.sprite.Group()
+    ship.health = ['♥' for i in range(health)]
+    while ship.health:
+        all_sprites.draw(screen)
+        clock.tick(30)
+        ship_1.draw(screen)
+        ship_1.update()
+        draw_text()
+        bullet.update()
+        bullet.draw(screen)
+        pygame.display.flip()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
             keys = pygame.key.get_pressed()
             if keys[pygame.K_LEFT]:
                 if cannon.rect.x > 0:
@@ -163,4 +177,6 @@ while ship.health:
                 if cannon.rect.x < 1200:
                     cannon.rect.x += 10
             if keys[pygame.K_SPACE]:
-                bullet.add(Bullet(cannon.rect.x))
+                bullet.add(Bullet(cannon.rect.x, cannon.rect.y, '-'))
+            if keys[pygame.K_z] or keys[pygame.K_x]:
+                bullet.add(Bullet(ship.rect.x, ship.rect.y + 196, '+'))
