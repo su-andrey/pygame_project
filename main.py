@@ -1,10 +1,35 @@
 import os
 from war import start as s_t
 import pygame
+import input as ip
+
 
 missed = pygame.sprite.Group()
 
 fire_on_ship = pygame.sprite.Group()
+
+def start_screen(width, height, intro_text, image_name):
+
+    fon = pygame.transform.scale(load_image(image_name), (width, height))
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 26)
+    text_coord = 50
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color('blue'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
+            elif event.type == pygame.KEYDOWN or \
+                    event.type == pygame.MOUSEBUTTONDOWN:
+                return  # начинаем игру
+        pygame.display.flip()
 
 
 def load_image(name, colorkey=-1):
@@ -39,7 +64,10 @@ class Board:
         self.width = width
         self.cnt = 0
         self.height = height
-        self.load_level('ships.txt')
+        try:
+            self.load_level(ip.main())
+        except FileNotFoundError:
+            self.load_level('ships.txt')
         self.cell_size = 70
 
     def load_level(self, filename):
@@ -92,6 +120,11 @@ class Board:
                                      width=5)
                     pygame.draw.line(screen, 'red', (i * self.cell_size, j * self.cell_size + cell_size - 3),
                                      (i * self.cell_size + cell_size - 3, j * self.cell_size + 3), width=5)
+    def alive(self):
+        cnt = 0
+        for elem in self.board:
+            cnt += sum(elem)
+        return cnt
 
 
 def draw_text():
@@ -101,16 +134,21 @@ def draw_text():
     text_rect.midtop = (10, 0)
     screen.blit(text_surface, text_rect)
 
-
 if __name__ == '__main__':
-    pygame.init()
     size = 750, 700
-    screen = pygame.display.set_mode(size)
-    pygame.display.set_caption('Морской бой')
     brd = Board(10, 10)
+    pygame.init()
+    screen = pygame.display.set_mode(size)
+    start_screen(size[0], size[1], ["Рад тебя здравстовать, дорогой игрок,",
+                  "Правила игры очень просты:",
+                  "Море размечено на квадраты, стреляй по ним.",
+                  "Попадешь - нанесешь ущерб врагу,",
+                  'Но так просто он не дастся!'], 'fon.jpg')
+    pygame.display.set_caption('Морской бой')
     cell_size = 70
-    running = True
-    while running:
+    start_cnt = brd.alive()
+    while brd.alive() != start_cnt * 2:
+        brd.alive()
         screen.fill('black')
         draw_text()
         brd.render(screen)
@@ -121,4 +159,5 @@ if __name__ == '__main__':
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 brd.get_click(event.pos)
+    start_screen(size[0], size[1], ["Враг был повержен!", "Поздравляю!"], 'fon_2.jpg')
 

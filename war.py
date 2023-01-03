@@ -4,11 +4,11 @@ import pygame
 
 width, height = 900, 900
 all_sprites = pygame.sprite.Group()
-pygame.init()
-size = 1320, 750
 x, y = 150, 150
-screen = pygame.display.set_mode(size)
-pygame.display.set_caption('Парашют')
+size = 1320, 750
+pygame.init()
+sc = pygame.display.set_mode(size)
+pygame.display.set_caption('Бой')
 
 
 def load_image(name, colorkey=-1):
@@ -77,16 +77,15 @@ class Bullet(pygame.sprite.Sprite):
 
     def update(self):
         if pygame.sprite.collide_mask(ship, self):
-            ship.health = ship.health[:-1]
-            print(ship.health)
             self.kill()
+            ship.health = ship.health[:-1]
             expl = Explosion(self.rect.center)
             pygame.display.flip()
         if pygame.sprite.collide_mask(cannon, self) and self.sign == '+':
             ship.health.append('♥')
             expl = Explosion(self.rect.center)
             self.kill()
-        if self.sign == '-':
+        elif self.sign == '-':
             self.rect.y -= 20
         else:
             self.rect.y += 20
@@ -110,7 +109,7 @@ class Explosion(pygame.sprite.Sprite):
         ct = pygame.time.Clock()
         for i in range(9):
             ct.tick(15)
-            all_sprites.draw(screen)
+            all_sprites.draw(sc)
             self.image = load_image(f'regularExplosion0{i}.png')
             pygame.display.flip()
         self.kill()
@@ -152,31 +151,32 @@ def draw_text():
     text_surface = font.render(''.join(ship.health), True, 'red ')
     text_rect = text_surface.get_rect()
     text_rect.midtop = (15 * len(ship.health), 0)
-    screen.blit(text_surface, text_rect)
+    sc.blit(text_surface, text_rect)
 
 def start(health):
     bullet = pygame.sprite.Group()
     ship.health = ['♥' for i in range(health)]
     while ship.health:
-        all_sprites.draw(screen)
+        all_sprites.draw(sc)
         clock.tick(30)
-        ship_1.draw(screen)
+        ship_1.draw(sc)
         ship_1.update()
         draw_text()
         bullet.update()
-        bullet.draw(screen)
+        bullet.draw(sc)
         pygame.display.flip()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit()
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_LEFT]:
-                if cannon.rect.x > 0:
-                    cannon.rect.x -= 10
-            if keys[pygame.K_RIGHT]:
-                if cannon.rect.x < 1200:
-                    cannon.rect.x += 10
-            if keys[pygame.K_SPACE]:
-                bullet.add(Bullet(cannon.rect.x, cannon.rect.y, '-'))
-            if keys[pygame.K_z] or keys[pygame.K_x]:
-                bullet.add(Bullet(ship.rect.x, ship.rect.y + 196, '+'))
+            if event.type == pygame.KEYDOWN:
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_LEFT]:
+                    if cannon.rect.x > 0:
+                        cannon.rect.x -= 10
+                if keys[pygame.K_RIGHT]:
+                    if cannon.rect.x < 1200:
+                        cannon.rect.x += 10
+                if keys[pygame.K_SPACE]:
+                    bullet.add(Bullet(cannon.rect.x, cannon.rect.y, '-'))
+                if keys[pygame.K_z] or keys[pygame.K_x]:
+                    bullet.add(Bullet(ship.rect.x, ship.rect.y + 196, '+'))
