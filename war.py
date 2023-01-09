@@ -9,7 +9,7 @@ size = 1320, 750
 pygame.init()
 sc = pygame.display.set_mode(size)
 pygame.display.set_caption('Бой')
-
+sound1 = pygame.mixer.Sound('data/mini_boom.mp3')
 
 def load_image(name, colorkey=-1):
     fullname = os.path.join('data', name)
@@ -78,10 +78,12 @@ class Bullet(pygame.sprite.Sprite):
     def update(self):
         if pygame.sprite.collide_mask(ship, self):
             self.kill()
+            sound1.play()
             ship.health = ship.health[:-1]
             expl = Explosion(self.rect.center)
             pygame.display.flip()
         if pygame.sprite.collide_mask(cannon, self) and self.sign == '+':
+            sound1.play()
             ship.health.append('♥')
             expl = Explosion(self.rect.center)
             self.kill()

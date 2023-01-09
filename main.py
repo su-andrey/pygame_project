@@ -7,7 +7,8 @@ import input as ip
 missed = pygame.sprite.Group()
 
 fire_on_ship = pygame.sprite.Group()
-
+pygame.mixer.music.load('data/corsars.mp3')
+pygame.mixer.music.play(-1)
 def start_screen(width, height, intro_text, image_name):
 
     fon = pygame.transform.scale(load_image(image_name), (width, height))
