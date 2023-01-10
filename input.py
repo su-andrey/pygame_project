@@ -2,7 +2,7 @@ import pygame as pg
 import pygame.freetype as freetype
 
 PRINT_EVENT = False
-WINDOWWIDTH, WINDOWHEIGHT = 750, 750
+WINDOWWIDTH, WINDOWHEIGHT = 1150, 800
 
 CHATLIST_POS = pg.Rect(0, 20, WINDOWWIDTH, 400)
 CHATBOX_POS = pg.Rect(0, 440, WINDOWWIDTH, 40)
@@ -15,10 +15,9 @@ pg.display.set_caption("TextInput example")
 FPSClock = pg.time.Clock()
 
 Font = freetype.SysFont('arial', 24)
-FontSmall = freetype.SysFont('arial', 16)
 
 
-def main():
+def main(some_text):
     global BGCOLOR, PRINT_EVENT, CHATBOX_POS, CHATLIST_POS, CHATLIST_MAXSIZE
     global FPSClock, Font, Screen
     pg.key.start_text_input()
@@ -80,7 +79,7 @@ def main():
 
 
         Screen.fill('black')
-        draw_text()
+        draw_text(some_text)
 
         # Chat box updates
         start_pos = CHATBOX_POS.copy()
@@ -102,9 +101,9 @@ def main():
 
         pg.display.update()
 
-def draw_text():
+def draw_text(text):
     font = pg.font.Font(pg.font.match_font('arial'), 30)
-    text_surface = font.render('Привет, для начала введи имя файла, в котором лежит карта', True, 'green')
+    text_surface = font.render(text, True, 'green')
     text_rect = text_surface.get_rect()
     text_rect.midtop = (370, 0)
     Screen.blit(text_surface, text_rect)

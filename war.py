@@ -10,6 +10,8 @@ pygame.init()
 sc = pygame.display.set_mode(size)
 pygame.display.set_caption('Бой')
 sound1 = pygame.mixer.Sound('data/mini_boom.mp3')
+fight = pygame.mixer.Sound('data/fight.mp3')
+
 
 def load_image(name, colorkey=-1):
     fullname = os.path.join('data', name)
@@ -156,6 +158,7 @@ def draw_text():
     sc.blit(text_surface, text_rect)
 
 def start(health):
+    fight.play()
     bullet = pygame.sprite.Group()
     ship.health = ['♥' for i in range(health)]
     while ship.health:
@@ -182,3 +185,4 @@ def start(health):
                     bullet.add(Bullet(cannon.rect.x, cannon.rect.y, '-'))
                 if keys[pygame.K_z] or keys[pygame.K_x]:
                     bullet.add(Bullet(ship.rect.x, ship.rect.y + 196, '+'))
+    fight.stop()

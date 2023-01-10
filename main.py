@@ -1,16 +1,18 @@
 import os
-from war import start as s_t
+import time
 import pygame
-import input as ip
 
+import input as ip
+from war import start as s_t
 
 missed = pygame.sprite.Group()
 
 fire_on_ship = pygame.sprite.Group()
 pygame.mixer.music.load('data/corsars.mp3')
 pygame.mixer.music.play(-1)
-def start_screen(width, height, intro_text, image_name):
+water = pygame.mixer.Sound('data/water.mp3')
 
+def start_screen(width, height, intro_text, image_name):
     fon = pygame.transform.scale(load_image(image_name), (width, height))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 26)
@@ -66,7 +68,7 @@ class Board:
         self.cnt = 0
         self.height = height
         try:
-            self.load_level(ip.main())
+            self.load_level(ip.main('Введи имя файла, в котором лежит карта'))
         except FileNotFoundError:
             self.load_level('ships.txt')
         self.cell_size = 70
@@ -96,12 +98,17 @@ class Board:
         x, y = pos[0] // self.cell_size, pos[1] // self.cell_size
         if x < self.height and y < self.height:
             if self.check(x, y):
-                s_t(5)
+                pygame.mixer.music.pause()
+                print('pause')
+                s_t(hard_level)
+                pygame.mixer.music.unpause()
                 self.cnt += 1
                 self.board[y][x] = 2
             else:
-                self.cnt += 1
-                missed.add(Missed_Mine(pos))
+                if self.check(x, y) == 0:
+                    water.play()
+                    self.cnt += 1
+                    missed.add(Missed_Mine(pos))
 
     def check(self, x, y):
         try:
@@ -121,6 +128,7 @@ class Board:
                                      width=5)
                     pygame.draw.line(screen, 'red', (i * self.cell_size, j * self.cell_size + cell_size - 3),
                                      (i * self.cell_size + cell_size - 3, j * self.cell_size + 3), width=5)
+
     def alive(self):
         cnt = 0
         for elem in self.board:
@@ -128,12 +136,18 @@ class Board:
         return cnt
 
 
-def draw_text():
+def draw_text(text, coord):
     font = pygame.font.Font(pygame.font.match_font('arial'), 50)
-    text_surface = font.render(str(brd.cnt), True, 'white')
+    text_surface = font.render(text, True, 'white')
     text_rect = text_surface.get_rect()
-    text_rect.midtop = (10, 0)
+    text_rect.midtop = coord
     screen.blit(text_surface, text_rect)
+
+def change_time():
+    times[1] = int(time.time() - start_time) - 60 * times[0]
+    if times[1] >= 60:
+        times[0] += 1
+        times[1] -= 60
 
 if __name__ == '__main__':
     size = 750, 700
@@ -141,17 +155,27 @@ if __name__ == '__main__':
     pygame.init()
     screen = pygame.display.set_mode(size)
     start_screen(size[0], size[1], ["Рад тебя здравстовать, дорогой игрок,",
-                  "Правила игры очень просты:",
-                  "Море размечено на квадраты, стреляй по ним.",
-                  "Попадешь - нанесешь ущерб врагу,",
-                  'Но так просто он не дастся!'], 'fon.jpg')
+                                    "Правила игры очень просты:",
+                                    "Море размечено на квадраты, стреляй по ним.",
+                                    "Попадешь - нанесешь ущерб врагу,",
+                                    'Но так просто он не дастся!'], 'fon.jpg')
     pygame.display.set_caption('Морской бой')
+    while 1:
+        try:
+            hard_level = int(ip.main('Введите желаемы уровень сложности, не меньший 1.'))
+            break
+        except:
+            pass
     cell_size = 70
     start_cnt = brd.alive()
+    start_time = time.time()
+    times = [0, 0]
     while brd.alive() != start_cnt * 2:
-        brd.alive()
         screen.fill('black')
-        draw_text()
+        change_time()
+        draw_text(':'.join([str(elem) for elem in times]), (714, 0))
+        brd.alive()
+        draw_text(str(brd.cnt), (10, 0))
         brd.render(screen)
         fire_on_ship.draw(screen)
         pygame.display.flip()
@@ -160,5 +184,7 @@ if __name__ == '__main__':
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 brd.get_click(event.pos)
+    pygame.mixer.quit()
+    pygame.mixer.music.load('data/fanf.mp3')
+    pygame.mixer.music.play(-1)
     start_screen(size[0], size[1], ["Враг был повержен!", "Поздравляю!"], 'fon_2.jpg')
-
