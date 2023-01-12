@@ -1,17 +1,16 @@
 import pygame as pg
 import pygame.freetype as freetype
+import main as mn
+import json
 
 PRINT_EVENT = False
-WINDOWWIDTH, WINDOWHEIGHT = 1150, 800
-
-CHATLIST_POS = pg.Rect(0, 20, WINDOWWIDTH, 400)
-CHATBOX_POS = pg.Rect(0, 440, WINDOWWIDTH, 40)
+CHATLIST_POS = pg.Rect(0, 20, 1150, 400)
+CHATBOX_POS = pg.Rect(0, 440, 1150, 40)
 
 
 
 pg.init()
-Screen = pg.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
-pg.display.set_caption("TextInput example")
+Screen = pg.display.set_mode((1400, 1000))
 FPSClock = pg.time.Clock()
 
 Font = freetype.SysFont('arial', 24)
@@ -102,8 +101,22 @@ def main(some_text):
         pg.display.update()
 
 def draw_text(text):
-    font = pg.font.Font(pg.font.match_font('arial'), 30)
-    text_surface = font.render(text, True, 'green')
-    text_rect = text_surface.get_rect()
-    text_rect.midtop = (370, 0)
-    Screen.blit(text_surface, text_rect)
+    if 'records' in text and 'Введите' not in text:
+        with open('data/res.json') as cat_file:
+            data = json.load(cat_file)
+        if text[-2:] == ' 0':
+            print(data)
+        else:
+            ind = (text[-2:]).strip()
+            if len(data[ind]) > 10:
+                res = ' '.join(sorted(data[ind])[:10])
+                res += f' {data[ind][-1]}'
+            else:
+                res = ' '.join(data[ind])
+            print(res)
+    else:
+        font = pg.font.Font(pg.font.match_font('arial'), 30)
+        text_surface = font.render(text, True, 'green')
+        text_rect = text_surface.get_rect()
+        text_rect.x = 0
+        Screen.blit(text_surface, text_rect)

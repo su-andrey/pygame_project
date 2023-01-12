@@ -1,5 +1,7 @@
+import json
 import os
 import time
+
 import pygame
 
 import input as ip
@@ -12,13 +14,14 @@ pygame.mixer.music.load('data/corsars.mp3')
 pygame.mixer.music.play(-1)
 water = pygame.mixer.Sound('data/water.mp3')
 
+
 def start_screen(width, height, intro_text, image_name):
     fon = pygame.transform.scale(load_image(image_name), (width, height))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 26)
     text_coord = 50
     for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('blue'))
+        string_rendered = font.render(line, 1, pygame.Color('green'))
         intro_rect = string_rendered.get_rect()
         text_coord += 10
         intro_rect.top = text_coord
@@ -68,7 +71,12 @@ class Board:
         self.cnt = 0
         self.height = height
         try:
-            self.load_level(ip.main('Введи имя файла, в котором лежит карта'))
+            name = (ip.main(
+                'Введите имя файла, в котором лежит карта Для просмотра рекородов введите records сложность'))
+            if 'records' not in name:
+                self.load_level(name)
+            else:
+                ip.main(name)
         except FileNotFoundError:
             self.load_level('ships.txt')
         self.cell_size = 70
@@ -143,11 +151,16 @@ def draw_text(text, coord):
     text_rect.midtop = coord
     screen.blit(text_surface, text_rect)
 
+
 def change_time():
     times[1] = int(time.time() - start_time) - 60 * times[0]
     if times[1] >= 60:
         times[0] += 1
         times[1] -= 60
+
+
+
+
 
 if __name__ == '__main__':
     size = 750, 700
@@ -162,7 +175,8 @@ if __name__ == '__main__':
     pygame.display.set_caption('Морской бой')
     while 1:
         try:
-            hard_level = int(ip.main('Введите желаемы уровень сложности, не меньший 1.'))
+            hard_level = int(
+                ip.main('Введите желаемы уровень сложности, не меньший 1.'))
             break
         except:
             pass
@@ -184,7 +198,20 @@ if __name__ == '__main__':
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 brd.get_click(event.pos)
-    pygame.mixer.quit()
+    res_time = ':'.join(str(elem) for elem in times)
     pygame.mixer.music.load('data/fanf.mp3')
     pygame.mixer.music.play(-1)
-    start_screen(size[0], size[1], ["Враг был повержен!", "Поздравляю!"], 'fon_2.jpg')
+    pygame.mixer.quit()
+    txt = ["Враг был повержен!", "Поздравляю!"]
+    with open('data/res.json', 'r') as cat_file:
+        data = json.load(cat_file)
+        print(res_time)
+        print(data[str(hard_level)])
+        data[str(hard_level)].append(res_time)
+        print(data[str(hard_level)])
+        if sorted(data[str(hard_level)], key=len)[0] == res_time:
+            txt.append("А кроме того, ты установил новый рекорд в данной категории!")
+            txt.append(f"Все корабли были уничтожены всего за {res_time}минут")
+    with open('data/res.json', 'w') as file:
+        json.dump(data, file)
+    start_screen(size[0], size[1], txt, 'fon_1.jpg')
