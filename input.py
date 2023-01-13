@@ -8,7 +8,6 @@ CHATLIST_POS = pg.Rect(0, 20, 1150, 400)
 CHATBOX_POS = pg.Rect(0, 440, 1150, 40)
 
 
-
 pg.init()
 Screen = pg.display.set_mode((1400, 1000))
 FPSClock = pg.time.Clock()
@@ -56,11 +55,7 @@ def main(some_text):
                         continue
                     # Append chat list
                     ChatList.append(_IMEText)
-
-                    tex = 0
                     return _IMEText
-
-
             elif event.type == pg.TEXTEDITING:
                 if PRINT_EVENT:
                     print(event)
@@ -75,8 +70,6 @@ def main(some_text):
                 _IMEEditingText = ""
                 _IMEText = _IMEText[0:_IMETextPos] + event.text + _IMEText[_IMETextPos:]
                 _IMETextPos += len(event.text)
-
-
         Screen.fill('black')
         draw_text(some_text)
 
@@ -97,23 +90,60 @@ def main(some_text):
         )
         start_pos.x += rect_textM.width
         Font.render_to(Screen, start_pos, ime_textR, 'green')
-
         pg.display.update()
+
+
+def custom_draw(text, size, hard_level):
+    if type(text) == list:
+        text1, text2 = text[0], text[1]
+    font = pg.font.Font(pg.font.match_font('arial'), size)
+    font_small = pg.font.Font(pg.font.match_font('arial'), int(size * 0.8))
+    if type(text) != list:
+        text_surface_for_hard_level = font_small.render(f'Дорогой игрок вот твои рекорды за {hard_level} '
+                                                        f'уровень сложности', True, 'green')
+        text_surface = font.render(text, True, 'green')
+    else:
+        text_surface_for_hard_level = font_small.render(text1, True, 'green')
+        text_surface = font.render(text2, True, 'green')
+    text_rect_for_hard_level = text_surface_for_hard_level.get_rect()
+    text_rect_for_hard_level.x = 0
+    text_rect = text_surface.get_rect()
+    text_rect.x, text_rect.y = 0, 100
+    Screen.blit(text_surface_for_hard_level, text_rect_for_hard_level)
+    Screen.blit(text_surface, text_rect)
+    pg.display.flip()
+    while True:
+        for event in pg.event.get():
+            if event.type == pg.KEYDOWN:
+                exit()
+            if event.type == pg.QUIT:
+                exit()
+
 
 def draw_text(text):
     if 'records' in text and 'Введите' not in text:
         with open('data/res.json') as cat_file:
             data = json.load(cat_file)
-        if text[-2:] == ' 0':
+        ind = (text[-2:]).strip()
+        if ind == ' 0':
             print(data)
         else:
-            ind = (text[-2:]).strip()
-            if len(data[ind]) > 10:
-                res = ' '.join(sorted(data[ind])[:10])
-                res += f' {data[ind][-1]}'
-            else:
-                res = ' '.join(data[ind])
-            print(res)
+            try:
+                if len(data[ind]) > 10:
+                    res = 'мин '.join(sorted(data[ind])[:10])
+                    res += f'мин {data[ind][-1]}мин'
+                    custom_draw(res, Screen.get_size()[0] // 32, ind)
+                else:
+                    res = 'мин '.join(data[ind])
+                    res += 'мин'
+                    if res:
+                        custom_draw(res, Screen.get_size()[0] // (len(res) + 15), ind)
+                    else:
+                        res = ['Пока нет рекорда в режиме. Если хотите установить его', f'То при выборе режима '
+                                                                                    f'сложности напишите {ind}']
+                        custom_draw(res, 35, ind)
+            except KeyError:
+                main('Неверный формат ввода. Пример ввода: records 3')
     else:
         font = pg.font.Font(pg.font.match_font('arial'), 30)
         text_surface = font.render(text, True, 'green')

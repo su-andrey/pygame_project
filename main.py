@@ -70,16 +70,45 @@ class Board:
         self.width = width
         self.cnt = 0
         self.height = height
+        self.start_by_save = False
         try:
-            name = (ip.main(
-                'Введите имя файла, в котором лежит карта Для просмотра рекородов введите records сложность'))
-            if 'records' not in name:
-                self.load_level(name)
-            else:
-                ip.main(name)
+            with open('data/save.json', 'r') as f:
+                tmp_data = json.load(f)
+                if tmp_data['hard'] != 11:
+                    self.board = tmp_data['tmp']
+                    self.hard_level = tmp_data['hard']
+                    self.times = tmp_data['time']
+                    self.cnt = tmp_data['cnt']
+                    self.start_by_save = True
+            if not self.start_by_save:
+                name = (ip.main(
+                    'Введите имя файла, в котором лежит карта, для просмотра рекородов введите records сложность'))
+                if 'records' not in name and 'delete res from' not in name:
+                    self.load_level(name)
+                elif 'records' in name:
+                    ip.main(name)
+                else:
+                    file = open('data/admin_pswd.txt')
+                    if name.split()[-1] == file.read():
+                        delete_key = name.split()[-2]
+                        with open('data/res.json', 'r') as cat_file:
+                            data = json.load(cat_file)
+                            if delete_key.isdigit():
+                                data[delete_key] = []
+                            else:
+                                for i in range(1, 11):
+                                    data[str(i)] = []
+                        with open('data/res.json', 'w') as file:
+                            json.dump(data, file)
+                        start_screen(size[0], size[1], txt, 'fon_1.jpg')
+                    else:
+                        pass
         except FileNotFoundError:
             self.load_level('ships.txt')
         self.cell_size = 70
+        if not self.start_by_save:
+            self.times = [0, 0]
+
 
     def load_level(self, filename):
         self.board = []
@@ -105,18 +134,18 @@ class Board:
     def get_click(self, pos):
         x, y = pos[0] // self.cell_size, pos[1] // self.cell_size
         if x < self.height and y < self.height:
-            if self.check(x, y):
-                pygame.mixer.music.pause()
-                print('pause')
-                s_t(hard_level)
-                pygame.mixer.music.unpause()
-                self.cnt += 1
-                self.board[y][x] = 2
-            else:
-                if self.check(x, y) == 0:
-                    water.play()
+            if self.check(x, y) != 2:
+                if self.check(x, y):
+                    pygame.mixer.music.pause()
+                    s_t(brd.hard_level)
+                    pygame.mixer.music.unpause()
                     self.cnt += 1
-                    missed.add(Missed_Mine(pos))
+                    self.board[y][x] = 2
+                else:
+                    if self.check(x, y) == 0:
+                        water.play()
+                        self.cnt += 1
+                        missed.add(Missed_Mine(pos))
 
     def check(self, x, y):
         try:
@@ -153,13 +182,10 @@ def draw_text(text, coord):
 
 
 def change_time():
-    times[1] = int(time.time() - start_time) - 60 * times[0]
-    if times[1] >= 60:
-        times[0] += 1
-        times[1] -= 60
-
-
-
+    brd.times[1] = int(time.time() - start_time) - 60 * brd.times[0]
+    if brd.times[1] >= 60:
+        brd.times[0] += 1
+        brd.times[1] -= 60
 
 
 if __name__ == '__main__':
@@ -175,19 +201,25 @@ if __name__ == '__main__':
     pygame.display.set_caption('Морской бой')
     while 1:
         try:
-            hard_level = int(
-                ip.main('Введите желаемы уровень сложности, не меньший 1.'))
-            break
+            if not brd.start_by_save:
+                brd.hard_level = int(
+                    ip.main('Введите желаемы уровень сложности от 1 до 10'))
+                if brd.hard_level < 1:
+                    brd.hard_level = 1
+                elif brd.hard_level > 10:
+                    brd.hard_level = 10
+                break
+            else:
+                break
         except:
             pass
     cell_size = 70
     start_cnt = brd.alive()
-    start_time = time.time()
-    times = [0, 0]
+    start_time = time.time() - (int(brd.times[0]) * 60 + int(brd.times[1]))
     while brd.alive() != start_cnt * 2:
         screen.fill('black')
         change_time()
-        draw_text(':'.join([str(elem) for elem in times]), (714, 0))
+        draw_text(':'.join([str(elem) for elem in brd.times]), (714, 0))
         brd.alive()
         draw_text(str(brd.cnt), (10, 0))
         brd.render(screen)
@@ -195,23 +227,35 @@ if __name__ == '__main__':
         pygame.display.flip()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                with open('data/save.json', 'r') as save_file:
+                    data = json.load(save_file)
+                    data['tmp'] = brd.board
+                    data['hard'] = brd.hard_level
+                    data['time'] = brd.times
+                    data['cnt'] = brd.cnt
+                with open('data/save.json', 'w') as file:
+                    json.dump(data, file)
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 brd.get_click(event.pos)
-    res_time = ':'.join(str(elem) for elem in times)
+    res_time = ':'.join(str(elem) for elem in brd.times)
     pygame.mixer.music.load('data/fanf.mp3')
     pygame.mixer.music.play(-1)
     pygame.mixer.quit()
     txt = ["Враг был повержен!", "Поздравляю!"]
     with open('data/res.json', 'r') as cat_file:
         data = json.load(cat_file)
-        print(res_time)
-        print(data[str(hard_level)])
-        data[str(hard_level)].append(res_time)
-        print(data[str(hard_level)])
-        if sorted(data[str(hard_level)], key=len)[0] == res_time:
+        data[str(brd.hard_level)].append(res_time)
+        if sorted(data[str(brd.hard_level)], key=len)[0] == res_time:
             txt.append("А кроме того, ты установил новый рекорд в данной категории!")
             txt.append(f"Все корабли были уничтожены всего за {res_time}минут")
     with open('data/res.json', 'w') as file:
         json.dump(data, file)
     start_screen(size[0], size[1], txt, 'fon_1.jpg')
+    with open('data/save.json', 'r') as save_file:
+        data = json.load(save_file)
+        data['tmp'] = []
+        data['hard'] = 11
+        data['time'] = []
+    with open('data/save.json', 'w') as file:
+        json.dump(data, file)
