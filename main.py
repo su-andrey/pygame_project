@@ -60,8 +60,8 @@ class Missed_Mine(pygame.sprite.Sprite):
         super().__init__(missed)
         self.image = load_image("pngegg.png")
         self.rect = self.image.get_rect()
-        self.rect.centerx, self.rect.y = pos[0] // cell_size * cell_size + cell_size / 2, pos[
-            1] // cell_size * cell_size
+        self.rect.centerx, self.rect.y = pos[0] // brd.cell_size * brd.cell_size + brd.cell_size / 2, pos[
+            1] // brd.cell_size * brd.cell_size
         self.mask = pygame.mask.from_surface(self.image)
 
 
@@ -82,6 +82,7 @@ class Board:
                     self.times = tmp_data['time']
                     self.cnt = tmp_data['cnt']
                     self.start_by_save = True
+                    self.cell_size = 70
             if not self.start_by_save:
                 name = (ip.main(
                     'Введите имя файла, в котором лежит карта, для просмотра рекородов введите records сложность'))
@@ -135,6 +136,7 @@ class Board:
 
     def get_click(self, pos):
         x, y = pos[0] // self.cell_size, pos[1] // self.cell_size
+        print(x, y)
         if x < self.height and y < self.height:
             if self.check(x, y) != 2:
                 if self.check(x, y):
@@ -163,10 +165,10 @@ class Board:
                     j * self.cell_size, i * self.cell_size, self.cell_size, self.cell_size), 1)
                 if self.board[j][i] == 2:
                     pygame.draw.line(screen, 'red', (i * self.cell_size, j * self.cell_size + 3),
-                                     (i * self.cell_size + self.cell_size - 3, j * self.cell_size + cell_size - 3),
+                                     (i * self.cell_size + self.cell_size - 3, j * self.cell_size + self.cell_size - 3),
                                      width=5)
-                    pygame.draw.line(screen, 'red', (i * self.cell_size, j * self.cell_size + cell_size - 3),
-                                     (i * self.cell_size + cell_size - 3, j * self.cell_size + 3), width=5)
+                    pygame.draw.line(screen, 'red', (i * self.cell_size, j * self.cell_size + self.cell_size - 3),
+                                     (i * self.cell_size + self.cell_size - 3, j * self.cell_size + 3), width=5)
 
     def alive(self):
         cnt = 0
@@ -215,7 +217,6 @@ if __name__ == '__main__':
                 break
         except:
             pass
-    cell_size = 7
     if not brd.start_by_save:
         start_cnt = brd.alive()
     start_time = time.time() - (int(brd.times[0]) * 60 + int(brd.times[1]))
