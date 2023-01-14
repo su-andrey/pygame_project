@@ -71,10 +71,12 @@ class Board:
         self.cnt = 0
         self.height = height
         self.start_by_save = False
+        self.start_cnt = 0
         try:
             with open('data/save.json', 'r') as f:
                 tmp_data = json.load(f)
                 if tmp_data['hard'] != 11:
+                    self.start_cnt = tmp_data['start_cnt']
                     self.board = tmp_data['tmp']
                     self.hard_level = tmp_data['hard']
                     self.times = tmp_data['time']
@@ -213,10 +215,11 @@ if __name__ == '__main__':
                 break
         except:
             pass
-    cell_size = 70
-    start_cnt = brd.alive()
+    cell_size = 7
+    if not brd.start_by_save:
+        start_cnt = brd.alive()
     start_time = time.time() - (int(brd.times[0]) * 60 + int(brd.times[1]))
-    while brd.alive() != start_cnt * 2:
+    while brd.alive() != brd.start_cnt * 2:
         screen.fill('black')
         change_time()
         draw_text(':'.join([str(elem) for elem in brd.times]), (714, 0))
@@ -229,6 +232,7 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 with open('data/save.json', 'r') as save_file:
                     data = json.load(save_file)
+                    data['start_cnt'] = start_cnt
                     data['tmp'] = brd.board
                     data['hard'] = brd.hard_level
                     data['time'] = brd.times
