@@ -218,7 +218,7 @@ if __name__ == '__main__':
         except:
             pass
     if not brd.start_by_save:
-        start_cnt = brd.alive()
+        brd.start_cnt = brd.alive()
     start_time = time.time() - (int(brd.times[0]) * 60 + int(brd.times[1]))
     while brd.alive() != brd.start_cnt * 2:
         screen.fill('black')
@@ -233,7 +233,7 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 with open('data/save.json', 'r') as save_file:
                     data = json.load(save_file)
-                    data['start_cnt'] = start_cnt
+                    data['start_cnt'] = brd.start_cnt
                     data['tmp'] = brd.board
                     data['hard'] = brd.hard_level
                     data['time'] = brd.times
