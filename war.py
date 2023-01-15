@@ -178,10 +178,10 @@ def start(health):
                 keys = pygame.key.get_pressed()
                 if keys[pygame.K_LEFT]:
                     if cannon.rect.x > 0:
-                        cannon.rect.x -= 10
+                        cannon.rect.x -= 30
                 if keys[pygame.K_RIGHT]:
                     if cannon.rect.x < 630:
-                        cannon.rect.x += 10
+                        cannon.rect.x += 30
                 if keys[pygame.K_SPACE]:
                     if time.time() - last_time_cannon >= 0.5:
                         last_time_cannon = time.time()
