@@ -1,5 +1,5 @@
 import os
-
+import time
 import pygame
 
 width, height = 900, 900
@@ -159,6 +159,7 @@ def draw_text():
 
 def start(health):
     fight.play()
+    last_time_cannon, last_time_ship = 1, 1
     bullet = pygame.sprite.Group()
     ship.health = ['♥' for i in range(health)]
     while ship.health:
@@ -179,10 +180,14 @@ def start(health):
                     if cannon.rect.x > 0:
                         cannon.rect.x -= 10
                 if keys[pygame.K_RIGHT]:
-                    if cannon.rect.x < 1200:
+                    if cannon.rect.x < 630:
                         cannon.rect.x += 10
                 if keys[pygame.K_SPACE]:
-                    bullet.add(Bullet(cannon.rect.x, cannon.rect.y, '-'))
+                    if time.time() - last_time_cannon >= 0.5:
+                        last_time_cannon = time.time()
+                        bullet.add(Bullet(cannon.rect.x, cannon.rect.y, '-'))
                 if keys[pygame.K_z] or keys[pygame.K_x]:
-                    bullet.add(Bullet(ship.rect.x, ship.rect.y + 196, '+'))
+                    if time.time() - last_time_ship >= 0.7:
+                        last_time_ship = time.time()
+                        bullet.add(Bullet(ship.rect.x, ship.rect.y + 196, '+'))
     fight.stop()

@@ -103,7 +103,11 @@ class Board:
                                     data[str(i)] = []
                         with open('data/res.json', 'w') as file:
                             json.dump(data, file)
-                        start_screen(size[0], size[1], txt, 'fon_1.jpg')
+                        try:
+                            start_screen(size[0], size[1], txt, 'fon_1.jpg')
+                        except NameError:
+                            print('Success')
+                            exit()
                     else:
                         pass
         except FileNotFoundError:
@@ -111,7 +115,6 @@ class Board:
         self.cell_size = 70
         if not self.start_by_save:
             self.times = [0, 0]
-
 
     def load_level(self, filename):
         self.board = []
@@ -136,7 +139,6 @@ class Board:
 
     def get_click(self, pos):
         x, y = pos[0] // self.cell_size, pos[1] // self.cell_size
-        print(x, y)
         if x < self.height and y < self.height:
             if self.check(x, y) != 2:
                 if self.check(x, y):
@@ -192,6 +194,18 @@ def change_time():
         brd.times[1] -= 60
 
 
+def save():
+    with open('data/save.json', 'r') as save_file:
+        data = json.load(save_file)
+        data['start_cnt'] = brd.start_cnt
+        data['tmp'] = brd.board
+        data['hard'] = brd.hard_level
+        data['time'] = brd.times
+        data['cnt'] = brd.cnt
+    with open('data/save.json', 'w') as file:
+        json.dump(data, file)
+
+
 if __name__ == '__main__':
     size = 750, 700
     brd = Board(10, 10)
@@ -231,18 +245,15 @@ if __name__ == '__main__':
         pygame.display.flip()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                with open('data/save.json', 'r') as save_file:
-                    data = json.load(save_file)
-                    data['start_cnt'] = brd.start_cnt
-                    data['tmp'] = brd.board
-                    data['hard'] = brd.hard_level
-                    data['time'] = brd.times
-                    data['cnt'] = brd.cnt
-                with open('data/save.json', 'w') as file:
-                    json.dump(data, file)
+                save()
                 exit()
+            if event.type == pygame.KEYDOWN:
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_LCTRL] and keys[pygame.K_s]:
+                    save()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 brd.get_click(event.pos)
+    change_time()
     res_time = ':'.join(str(elem) for elem in brd.times)
     pygame.mixer.music.load('data/fanf.mp3')
     pygame.mixer.music.play(-1)

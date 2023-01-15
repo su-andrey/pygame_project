@@ -1,3 +1,5 @@
+import time
+
 import pygame as pg
 import pygame.freetype as freetype
 import main as mn
@@ -93,22 +95,22 @@ def main(some_text):
         pg.display.update()
 
 
-def custom_draw(text, size, hard_level):
+def custom_draw(text, size, hard_level, y=100):
     if type(text) == list:
         text1, text2 = text[0], text[1]
     font = pg.font.Font(pg.font.match_font('arial'), size)
     font_small = pg.font.Font(pg.font.match_font('arial'), int(size * 0.8))
     if type(text) != list:
-        text_surface_for_hard_level = font_small.render(f'Дорогой игрок вот твои рекорды за {hard_level} '
+        text_surface_for_hard_level = font_small.render(f'Дорогой игрок, вот твои рекорды за {hard_level} '
                                                         f'уровень сложности', True, 'green')
         text_surface = font.render(text, True, 'green')
     else:
-        text_surface_for_hard_level = font_small.render(text1, True, 'green')
+        text_surface_for_hard_level = font.render(text1, True, 'green')
         text_surface = font.render(text2, True, 'green')
     text_rect_for_hard_level = text_surface_for_hard_level.get_rect()
     text_rect_for_hard_level.x = 0
     text_rect = text_surface.get_rect()
-    text_rect.x, text_rect.y = 0, 100
+    text_rect.x, text_rect.y = 0, y
     Screen.blit(text_surface_for_hard_level, text_rect_for_hard_level)
     Screen.blit(text_surface, text_rect)
     pg.display.flip()
@@ -124,9 +126,15 @@ def draw_text(text):
     if 'records' in text and 'Введите' not in text:
         with open('data/res.json') as cat_file:
             data = json.load(cat_file)
+        res = ['', '']
         ind = (text[-2:]).strip()
-        if ind == ' 0':
-            print(data)
+        if ind == '0':
+            for i in range(1, 11):
+                try:
+                    res[(i - 1) // 5] += (f'Cложность {i}: {data[str(i)][0]}мин; ')
+                except IndexError:
+                    res[(i - 1) // 5] += (f'Cложность{i}: пусто! ')
+            custom_draw(res, 30, res, 50)
         else:
             try:
                 if len(data[ind]) > 10:
@@ -135,15 +143,16 @@ def draw_text(text):
                     custom_draw(res, Screen.get_size()[0] // 32, ind)
                 else:
                     res = 'мин '.join(data[ind])
-                    res += 'мин'
+                    if res:
+                        res += 'мин'
                     if res:
                         custom_draw(res, Screen.get_size()[0] // (len(res) + 15), ind)
                     else:
-                        res = ['Пока нет рекорда в режиме. Если хотите установить его', f'То при выборе режима '
+                        res = ['Пока нет рекорда в этом режиме. Если Вы хотите установить его', f'То при выборе режима '
                                                                                     f'сложности напишите {ind}']
                         custom_draw(res, 35, ind)
             except KeyError:
-                main('Неверный формат ввода. Пример ввода: records 3')
+                exit()
     else:
         font = pg.font.Font(pg.font.match_font('arial'), 30)
         text_surface = font.render(text, True, 'green')
