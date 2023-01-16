@@ -103,7 +103,7 @@ def custom_draw(text, size, hard_level, y=100):
     if type(text) != list:
         text_surface_for_hard_level = font_small.render(f'Дорогой игрок, вот твои рекорды за {hard_level} '
                                                         f'уровень сложности', True, 'green')
-        text_surface = font.render(text, True, 'green')
+        text_surfZace = font.render(text, True, 'green')
     else:
         text_surface_for_hard_level = font.render(text1, True, 'green')
         text_surface = font.render(text2, True, 'green')
