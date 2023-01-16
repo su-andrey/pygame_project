@@ -1,5 +1,6 @@
 import os
 import time
+
 import pygame
 
 width, height = 900, 900
@@ -82,12 +83,12 @@ class Bullet(pygame.sprite.Sprite):
             self.kill()
             sound1.play()
             ship.health = ship.health[:-1]
-            expl = Explosion(self.rect.center)
+            Explosion(self.rect.center)
             pygame.display.flip()
         if pygame.sprite.collide_mask(cannon, self) and self.sign == '+':
             sound1.play()
             ship.health.append('♥')
-            expl = Explosion(self.rect.center)
+            Explosion(self.rect.center)
             self.kill()
         elif self.sign == '-':
             self.rect.y -= 20
@@ -95,8 +96,6 @@ class Bullet(pygame.sprite.Sprite):
             self.rect.y += 20
         if self.rect.y <= 0 or self.rect.y >= height:
             self.kill()
-
-
 
 
 class Explosion(pygame.sprite.Sprite):
@@ -119,6 +118,7 @@ class Explosion(pygame.sprite.Sprite):
         self.kill()
         pygame.display.flip()
 
+
 class Ship(pygame.sprite.Sprite):
     image = load_image("ship.png")
     image_1 = image
@@ -126,6 +126,7 @@ class Ship(pygame.sprite.Sprite):
     image_2 = pygame.transform.flip(image, True, False)
 
     def __init__(self, pos):
+        self.make_a_shot = False
         super().__init__(ship_1)
         self.image = Ship.image_1
         self.rect = self.image.get_rect()
@@ -133,7 +134,6 @@ class Ship(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.y = 100
         self.x = self.rect.x
-
 
     def update(self):
         self.x += 20
@@ -143,6 +143,9 @@ class Ship(pygame.sprite.Sprite):
         else:
             self.image = self.image_1
             self.rect.x = self.x % 480
+        if cannon.rect.collidepoint((self.rect.x, cannon.rect.y)) or cannon.rect.collidepoint(
+                (self.rect.x + 150, cannon.rect.y)):
+            self.make_a_shot = True
 
 
 ship = Ship((55, 200))
@@ -156,6 +159,7 @@ def draw_text():
     text_rect = text_surface.get_rect()
     text_rect.midtop = (15 * len(ship.health), 0)
     sc.blit(text_surface, text_rect)
+
 
 def start(health):
     fight.play()
@@ -171,6 +175,12 @@ def start(health):
         bullet.update()
         bullet.draw(sc)
         pygame.display.flip()
+        if ship.make_a_shot:
+            ship.make_a_shot = False
+            if time.time() - last_time_ship >= 2:
+                last_time_ship = time.time()
+                bullet.add(Bullet(ship.rect.x - 50, ship.rect.y + 196, '+'))
+                bullet.add(Bullet(ship.rect.x + 150, ship.rect.y + 196, '+'))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit()
@@ -186,8 +196,5 @@ def start(health):
                     if time.time() - last_time_cannon >= 0.5:
                         last_time_cannon = time.time()
                         bullet.add(Bullet(cannon.rect.x, cannon.rect.y, '-'))
-                if keys[pygame.K_z] or keys[pygame.K_x]:
-                    if time.time() - last_time_ship >= 0.7:
-                        last_time_ship = time.time()
-                        bullet.add(Bullet(ship.rect.x, ship.rect.y + 196, '+'))
+
     fight.stop()

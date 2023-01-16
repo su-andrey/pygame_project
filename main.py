@@ -106,7 +106,7 @@ class Board:
                         try:
                             start_screen(size[0], size[1], txt, 'fon_1.jpg')
                         except NameError:
-                            print('Success')
+                            ip.main('Success')
                             exit()
                     else:
                         pass
