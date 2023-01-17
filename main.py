@@ -21,7 +21,7 @@ def start_screen(width, height, intro_text, image_name):
     font = pygame.font.Font(None, 26)
     text_coord = 50
     for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('green'))
+        string_rendered = font.render(line, True, pygame.Color('green'))
         intro_rect = string_rendered.get_rect()
         text_coord += 10
         intro_rect.top = text_coord
@@ -180,7 +180,7 @@ class Board:
 
 
 def draw_text(text, coord):
-    font = pygame.font.Font(pygame.font.match_font('arial'), 50)
+    font = pygame.font.Font(pygame.font.match_font('Arial'), 50)
     text_surface = font.render(text, True, 'white')
     text_rect = text_surface.get_rect()
     text_rect.midtop = coord
@@ -239,7 +239,7 @@ if __name__ == '__main__':
         change_time()
         draw_text(':'.join([str(elem) for elem in brd.times]), (714, 0))
         brd.alive()
-        draw_text(str(brd.cnt), (10, 0))
+        draw_text(str(brd.cnt), (30, 0))
         brd.render(screen)
         fire_on_ship.draw(screen)
         pygame.display.flip()
@@ -258,13 +258,13 @@ if __name__ == '__main__':
     pygame.mixer.music.load('data/fanf.mp3')
     pygame.mixer.music.play(-1)
     pygame.mixer.quit()
-    txt = ["Враг был повержен!", "Поздравляю!"]
+    txt = [f"Враг был повержен всего за {brd.cnt} выстрелов и {res_time} минут!", "Поздравляю!"]
     with open('data/res.json', 'r') as cat_file:
         data = json.load(cat_file)
         data[str(brd.hard_level)].append(res_time)
         if sorted(data[str(brd.hard_level)], key=len)[0] == res_time:
             txt.append("А кроме того, ты установил новый рекорд в данной категории!")
-            txt.append(f"Все корабли были уничтожены всего за {res_time}минут")
+            txt.append(f"Для просмотра всех рекордов на стартовом экране введи records 0")
     with open('data/res.json', 'w') as file:
         json.dump(data, file)
     start_screen(size[0], size[1], txt, 'fon_1.jpg')

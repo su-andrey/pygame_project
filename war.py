@@ -45,7 +45,7 @@ class Sea(pygame.sprite.Sprite):
 
 
 class Cannon(pygame.sprite.Sprite):
-    image = load_image("cannon.png")
+    image = load_image("cannon1.png")
 
     def __init__(self):
         super().__init__(all_sprites)
@@ -136,7 +136,7 @@ class Ship(pygame.sprite.Sprite):
         self.x = self.rect.x
 
     def update(self):
-        self.x += 20
+        self.x += 20 + len(self.health) // 5
         if ((self.x - self.x % 480) // 480) % 2:
             self.rect.x = 480 - self.x % 480
             self.image = self.image_2
@@ -187,14 +187,20 @@ def start(health):
             if event.type == pygame.KEYDOWN:
                 keys = pygame.key.get_pressed()
                 if keys[pygame.K_LEFT]:
-                    if cannon.rect.x > 0:
+                    if cannon.rect.x > 29:
                         cannon.rect.x -= 30
                 if keys[pygame.K_RIGHT]:
-                    if cannon.rect.x < 630:
+                    if cannon.rect.x < 601:
                         cannon.rect.x += 30
+                if keys[pygame.K_x]:
+                    if cannon.rect.x < 640:
+                        cannon.rect.x += 10
+                if keys[pygame.K_z]:
+                    if cannon.rect.x > 9:
+                        cannon.rect.x -= 10
                 if keys[pygame.K_SPACE]:
                     if time.time() - last_time_cannon >= 0.5:
                         last_time_cannon = time.time()
                         bullet.add(Bullet(cannon.rect.x, cannon.rect.y, '-'))
-
+    bullet = pygame.sprite.Group()
     fight.stop()

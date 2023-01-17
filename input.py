@@ -11,13 +11,14 @@ CHATBOX_POS = pg.Rect(0, 440, 1150, 40)
 
 
 pg.init()
-Screen = pg.display.set_mode((1400, 1000))
-FPSClock = pg.time.Clock()
 
+FPSClock = pg.time.Clock()
+Screen = pg.display.set_mode((1400, 1000))
 Font = freetype.SysFont('arial', 24)
 
 
 def main(some_text):
+
     global BGCOLOR, PRINT_EVENT, CHATBOX_POS, CHATLIST_POS, CHATLIST_MAXSIZE
     global FPSClock, Font, Screen
     pg.key.start_text_input()
@@ -72,7 +73,7 @@ def main(some_text):
                 _IMEEditingText = ""
                 _IMEText = _IMEText[0:_IMETextPos] + event.text + _IMEText[_IMETextPos:]
                 _IMETextPos += len(event.text)
-        Screen.fill('black')
+        Screen.fill('sandybrown')
         draw_text(some_text)
 
         # Chat box updates
@@ -83,7 +84,7 @@ def main(some_text):
         )
         ime_textR = _IMEText[_IMETextPos:]
 
-        rect_textL = Font.render_to(Screen, start_pos, ime_textL, 'green')
+        rect_textL = Font.render_to(Screen, start_pos, ime_textL, 'dimgray')
         start_pos.x += rect_textL.width
 
         # Editing texts should be underlined
@@ -103,10 +104,10 @@ def custom_draw(text, size, hard_level, y=100):
     if type(text) != list:
         text_surface_for_hard_level = font_small.render(f'Дорогой игрок, вот твои рекорды за {hard_level} '
                                                         f'уровень сложности', True, 'green')
-        text_surfZace = font.render(text, True, 'green')
+        text_surface = font.render(text, True, 'deepskyblue')
     else:
-        text_surface_for_hard_level = font.render(text1, True, 'green')
-        text_surface = font.render(text2, True, 'green')
+        text_surface_for_hard_level = font.render(text1, True, 'deepskyblue')
+        text_surface = font.render(text2, True, 'deepskyblue')
     text_rect_for_hard_level = text_surface_for_hard_level.get_rect()
     text_rect_for_hard_level.x = 0
     text_rect = text_surface.get_rect()
@@ -152,6 +153,7 @@ def draw_text(text):
                                                                                     f'сложности напишите {ind}']
                         custom_draw(res, 35, ind)
             except KeyError:
+                print('Что-то было введено не так. Повторите!')
                 exit()
     else:
         font = pg.font.Font(pg.font.match_font('arial'), 30)
