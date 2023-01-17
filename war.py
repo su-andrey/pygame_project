@@ -11,6 +11,7 @@ pygame.init()
 sc = pygame.display.set_mode(size)
 pygame.display.set_caption('Бой')
 sound1 = pygame.mixer.Sound('data/mini_boom.mp3')
+pygame.mixer.music.set_volume(5)
 fight = pygame.mixer.Sound('data/fight.mp3')
 
 
@@ -81,7 +82,9 @@ class Bullet(pygame.sprite.Sprite):
     def update(self):
         if pygame.sprite.collide_mask(ship, self):
             self.kill()
+            pygame.mixer.pause()
             sound1.play()
+            pygame.mixer.unpause()
             ship.health = ship.health[:-1]
             Explosion(self.rect.center)
             pygame.display.flip()

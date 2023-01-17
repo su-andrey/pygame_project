@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import time
 
 import pygame
@@ -111,7 +112,8 @@ class Board:
                     else:
                         pass
         except FileNotFoundError:
-            self.load_level('ships.txt')
+            name = f'default{random.randint(0, 3)}.txt'
+            self.load_level(name)
         self.cell_size = 70
         if not self.start_by_save:
             self.times = [0, 0]
@@ -206,6 +208,16 @@ def save():
         json.dump(data, file)
 
 
+def delete():
+    with open('data/save.json', 'r') as save_file:
+        data = json.load(save_file)
+        data['tmp'] = []
+        data['hard'] = 11
+        data['time'] = []
+    with open('data/save.json', 'w') as file:
+        json.dump(data, file)
+
+
 if __name__ == '__main__':
     size = 750, 700
     brd = Board(10, 10)
@@ -251,13 +263,15 @@ if __name__ == '__main__':
                 keys = pygame.key.get_pressed()
                 if keys[pygame.K_LCTRL] and keys[pygame.K_s]:
                     save()
+                if keys[pygame.K_LCTRL] and keys[pygame.K_d]:
+                    delete()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 brd.get_click(event.pos)
+
     change_time()
     res_time = ':'.join(str(elem) for elem in brd.times)
     pygame.mixer.music.load('data/fanf.mp3')
     pygame.mixer.music.play(-1)
-    pygame.mixer.quit()
     txt = [f"Враг был повержен всего за {brd.cnt} выстрелов и {res_time} минут!", "Поздравляю!"]
     with open('data/res.json', 'r') as cat_file:
         data = json.load(cat_file)
@@ -268,10 +282,4 @@ if __name__ == '__main__':
     with open('data/res.json', 'w') as file:
         json.dump(data, file)
     start_screen(size[0], size[1], txt, 'fon_1.jpg')
-    with open('data/save.json', 'r') as save_file:
-        data = json.load(save_file)
-        data['tmp'] = []
-        data['hard'] = 11
-        data['time'] = []
-    with open('data/save.json', 'w') as file:
-        json.dump(data, file)
+    delete()
