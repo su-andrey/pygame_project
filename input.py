@@ -104,10 +104,10 @@ def custom_draw(text, size, hard_level, y=100):
     if type(text) != list:
         text_surface_for_hard_level = font_small.render(f'Дорогой игрок, вот твои рекорды за {hard_level} '
                                                         f'уровень сложности', True, 'green')
-        text_surface = font.render(text, True, 'deepskyblue')
+        text_surface = font.render(text, True, 'midnightblue')
     else:
-        text_surface_for_hard_level = font.render(text1, True, 'deepskyblue')
-        text_surface = font.render(text2, True, 'deepskyblue')
+        text_surface_for_hard_level = font.render(text1, True, 'midnightblue')
+        text_surface = font.render(text2, True, 'midnightblue')
     text_rect_for_hard_level = text_surface_for_hard_level.get_rect()
     text_rect_for_hard_level.x = 0
     text_rect = text_surface.get_rect()

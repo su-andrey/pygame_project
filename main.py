@@ -251,7 +251,7 @@ if __name__ == '__main__':
         change_time()
         draw_text(':'.join([str(elem) for elem in brd.times]), (714, 0))
         brd.alive()
-        draw_text(str(brd.cnt), (30, 0))
+        draw_text(str(brd.cnt), (714, 650))
         brd.render(screen)
         fire_on_ship.draw(screen)
         pygame.display.flip()
