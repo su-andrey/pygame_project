@@ -76,9 +76,9 @@ def main(some_text):
         Screen.fill('sandybrown')
         draw_text(some_text)
 
-        # Chat box updates
+
         start_pos = CHATBOX_POS.copy()
-        ime_textL = ">" + _IMEText[0:_IMETextPos]
+        ime_textL = "|" + _IMEText[0:_IMETextPos]
         ime_textM = (
                 _IMEEditingText[0:_IMEEditingPos] + "|" + _IMEEditingText[_IMEEditingPos:]
         )
