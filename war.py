@@ -2,7 +2,6 @@ import os
 import time
 
 import pygame
-
 width, height = 900, 900
 all_sprites = pygame.sprite.Group()
 x, y = 150, 150
@@ -54,7 +53,6 @@ class Cannon(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
-        # располагаем горы внизу
         self.rect.x = 450
         self.rect.y = 585
 
@@ -94,9 +92,9 @@ class Bullet(pygame.sprite.Sprite):
             Explosion(self.rect.center)
             self.kill()
         elif self.sign == '-':
-            self.rect.y -= 20
+            self.rect.y -= 10 * 60 // 100
         else:
-            self.rect.y += 20
+            self.rect.y += 10 * 60 // 100
         if self.rect.y <= 0 or self.rect.y >= height:
             self.kill()
 
@@ -139,7 +137,7 @@ class Ship(pygame.sprite.Sprite):
         self.x = self.rect.x
 
     def update(self):
-        self.x += 20 + len(self.health) // 5
+        self.x += int(20 * 30 // 100)
         if ((self.x - self.x % 480) // 480) % 2:
             self.rect.x = 480 - self.x % 480
             self.image = self.image_2
@@ -169,9 +167,10 @@ def start(health):
     last_time_cannon, last_time_ship = 1, 1
     bullet = pygame.sprite.Group()
     ship.health = ['♥' for i in range(health)]
+    clock = pygame.time.Clock()
     while ship.health:
         all_sprites.draw(sc)
-        clock.tick(30)
+        clock.tick(100)
         ship_1.draw(sc)
         ship_1.update()
         draw_text()
@@ -184,26 +183,25 @@ def start(health):
                 last_time_ship = time.time()
                 bullet.add(Bullet(ship.rect.x - 50, ship.rect.y + 196, '+'))
                 bullet.add(Bullet(ship.rect.x + 150, ship.rect.y + 196, '+'))
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            if cannon.rect.x > 29:
+                cannon.rect.x -= 2
+        if keys[pygame.K_RIGHT]:
+            if cannon.rect.x < 601:
+                cannon.rect.x += 2
+        if keys[pygame.K_x]:
+            if cannon.rect.x < 640:
+                cannon.rect.x += 1
+        if keys[pygame.K_z]:
+            if cannon.rect.x > 9:
+                cannon.rect.x -= 1
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit()
-            if event.type == pygame.KEYDOWN:
-                keys = pygame.key.get_pressed()
-                if keys[pygame.K_LEFT]:
-                    if cannon.rect.x > 29:
-                        cannon.rect.x -= 30
-                if keys[pygame.K_RIGHT]:
-                    if cannon.rect.x < 601:
-                        cannon.rect.x += 30
-                if keys[pygame.K_x]:
-                    if cannon.rect.x < 640:
-                        cannon.rect.x += 10
-                if keys[pygame.K_z]:
-                    if cannon.rect.x > 9:
-                        cannon.rect.x -= 10
-                if keys[pygame.K_SPACE]:
-                    if time.time() - last_time_cannon >= 0.5:
-                        last_time_cannon = time.time()
-                        bullet.add(Bullet(cannon.rect.x, cannon.rect.y, '-'))
+            if keys[pygame.K_SPACE]:
+                if time.time() - last_time_cannon >= 0.5:
+                    last_time_cannon = time.time()
+                    bullet.add(Bullet(cannon.rect.x, cannon.rect.y, '-'))
     bullet = pygame.sprite.Group()
     fight.stop()
